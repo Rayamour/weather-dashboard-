@@ -1,0 +1,138 @@
+{
+    "dataset_info": {
+        "total_bookings": 145496,
+        "date_range": [
+            "2023-03-17",
+            "2024-12-31"
+        ],
+        "unique_dates": 656,
+        "courses": [
+            "A",
+            "B",
+            "Par 3"
+        ],
+        "player_types": [
+            "Greenfee",
+            "Business Gold",
+            "Lid Premium",
+            "Lid Unlimited",
+            "Lid",
+            "NLGS",
+            "KLM-Lid",
+            "Business Diamond",
+            "Lid Easy",
+            "Oranje Leeuw",
+            "Intro speler",
+            "ANWB-golf",
+            "Lid Flex",
+            "Lid Comfort",
+            "Lid Par 3",
+            "Business flight blokken",
+            "Business Platinum",
+            "Greenfee Jeugd tm17",
+            "Golf Pro",
+            "Greenfree",
+            "IGolf",
+            "GolfGo",
+            "GCN/GVN",
+            "Birdyclub",
+            "Oranje Leeuw intro",
+            "KLM intro",
+            "IGolf intro",
+            "Greenfee Par-3/4",
+            "Shell AGV",
+            "NLGS intro"
+        ]
+    },
+    "key_metrics": {
+        "peak_booking_hour": 10,
+        "peak_hour_percentage": 13.6,
+        "peak_booking_day": "Saturday",
+        "peak_day_percentage": 16.5,
+        "most_popular_course_id": 1,
+        "most_popular_course_name": "A",
+        "most_popular_course_percentage": 49.3,
+        "highest_cancel_player_id": 14,
+        "highest_cancel_player_name": "Lid Comfort",
+        "highest_cancel_rate": 38.7,
+        "arrival_rate": 59.5,
+        "overall_cancellation_rate": 18.6,
+        "temp_booking_correlation": 0.6,
+        "rainy_cancellation_rate": 22.5,
+        "non_rainy_cancellation_rate": 15.2,
+        "rain_impact": 7.3,
+        "most_popular_channel_type": "Online",
+        "most_popular_channel_source": "Chronogolf",
+        "most_popular_channel_medium": "Mobile",
+        "most_popular_channel_percentage": 45.2
+    },
+    "insights": [
+        {
+            "category": "Booking Patterns",
+            "title": "Peak Booking Time",
+            "description": "The most popular booking hour is 10:00, accounting for 13.6% of all bookings."
+        },
+        {
+            "category": "Booking Patterns",
+            "title": "Peak Booking Day",
+            "description": "Saturday is the most popular day for bookings, accounting for 16.5% of all bookings."
+        },
+        {
+            "category": "Course Utilization",
+            "title": "Most Popular Course",
+            "description": "A is the most popular course, accounting for 49.3% of all bookings."
+        },
+        {
+            "category": "Player Behavior",
+            "title": "High Cancellation Rate",
+            "description": "Lid Comfort has the highest cancellation rate at 38.7%."
+        },
+        {
+            "category": "Booking Status",
+            "title": "Arrival Rate",
+            "description": "The overall arrival rate is 59.5% of all bookings."
+        },
+        {
+            "category": "Booking Status",
+            "title": "Cancellation Rate",
+            "description": "The overall cancellation rate is 18.6% of all bookings."
+        },
+        {
+            "category": "Weather Impact",
+            "title": "Temperature Effect",
+            "description": "There is a moderate positive correlation (0.6) between temperature and booking volume."
+        },
+        {
+            "category": "Weather Impact",
+            "title": "Rain Effect on Cancellations",
+            "description": "Rainy conditions increase cancellation rates by 7.3 percentage points compared to non-rainy conditions."
+        },
+        {
+            "category": "Booking Channels",
+            "title": "Most Popular Booking Channel",
+            "description": "The most popular booking channel is Online via Chronogolf (Mobile), accounting for 45.2% of all bookings."
+        }
+    ],
+    "recommendations": [
+        {
+            "category": "Staffing",
+            "title": "Optimize Staff Allocation",
+            "description": "Increase staff during peak booking hours around 10:00 to ensure smooth operations and customer satisfaction."
+        },
+        {
+            "category": "Marketing",
+            "title": "Balance Course Utilization",
+            "description": "Create promotions for less utilized courses to balance demand with A, which is currently the most popular."
+        },
+        {
+            "category": "Policy",
+            "title": "Targeted Cancellation Policy",
+            "description": "Implement a more stringent cancellation policy specifically for Lid Comfort players who show higher cancellation rates."
+        },
+        {
+            "category": "Technology",
+            "title": "Booking Channel Enhancement",
+            "description": "Invest in improving the Online booking experience via Chronogolf as it's the most popular booking channel."
+        }
+    ]
+}

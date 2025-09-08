@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golf Club Comprehensive Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1e293b;
+            --secondary-color: #06b6d4;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --dark-bg: #0f172a;
+            --text-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --weather-sunny: #fbbf24;
+            --weather-cloudy: #9ca3af;
+            --weather-rainy: #3b82f6;
+            --gradient-primary: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            --gradient-secondary: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .dashboard-header {
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .dashboard-header .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .dashboard-header h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #ffffff, #06b6d4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .dashboard-header p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--secondary-color);
+        }
+        
+        .card-header {
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.125rem;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+            background: linear-gradient(135deg, var(--card-bg) 0%, #f1f5f9 100%);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-secondary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-card:hover {
+            border-color: var(--secondary-color);
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            transform: translateY(-2px);
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-secondary);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-section {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-secondary);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+        
+        .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+            outline: none;
+        }
+        
+        .form-select:hover {
+            border-color: var(--secondary-color);
+        }
+        
+        .btn {
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-secondary);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            background: transparent;
+        }
+        
+        .btn-outline-secondary:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            background: rgba(6, 182, 212, 0.05);
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-outline-light {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+            background: transparent;
+        }
+        
+        .btn-outline-light:hover,
+        .btn-outline-light.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .btn-group .btn + .btn {
+            margin-left: -1px;
+        }
+        
+        .btn-group .btn:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .btn-group .btn:not(:first-child):not(:last-child) {
+            border-radius: 0;
+        }
+        
+        .insight-card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, #f8fafc 100%);
+            border-left: 4px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .insight-card:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+            border-left-width: 6px;
+        }
+        
+        .insight-title {
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--primary-color);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .insight-title i {
+            margin-right: 0.5rem;
+            font-size: 1.125rem;
+        }
+        
+        .insight-content {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        
+        .nav-tabs {
+            border: none;
+            margin-bottom: 0;
+            background: var(--light-bg);
+            border-radius: 12px 12px 0 0;
+            padding: 0.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--text-muted);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-right: 0.25rem;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: white;
+            background: var(--gradient-secondary);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .tab-content {
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 0 0 16px 16px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+        }
+        
+        .viz-img-container {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--light-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .viz-img-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 64px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border-color);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 34px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: var(--shadow-md);
+        }
+        
+        input:checked + .toggle-slider {
+            background: var(--secondary-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+        
+        #filterStatusMessage {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .dashboard-footer {
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            padding: 2rem 0;
+            margin-top: 3rem;
+            box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+        }
+        
+        .spinner-border {
+            color: var(--secondary-color);
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .stat-value {
+                font-size: 2.25rem;
+            }
+            
+            .filter-section {
+                padding: 1.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .btn {
+                padding: 0.625rem 1.25rem;
+                font-size: 0.8rem;
+            }
+            
+            .chart-container {
+                height: 280px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .dashboard-header {
+                padding: 1.5rem 0;
+            }
+            
+            .stat-card {
+                padding: 1.5rem 1rem;
+            }
+            
+            .filter-section {
+                padding: 1rem;
+            }
+            
+            .tab-content {
+                padding: 1rem;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+        
+        /* Tooltip styling */
+        .tooltip {
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg) !important;
+            border-radius: 8px !important;
+        }
+        
+        /* Image Modal Styling */
+        .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+        }
+        
+        .modal-header {
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            border-radius: 16px 16px 0 0;
+            border: none;
+            padding: 1.5rem;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .modal-body {
+            padding: 2rem;
+            background: var(--light-bg);
+        }
+        
+        .modal-footer {
+            border: none;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 0 0 16px 16px;
+        }
+        
+        .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
+        
+        .btn-close:hover {
+            opacity: 1;
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        #modalImage {
+            max-height: 70vh;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+        
+        #modalImage:hover {
+            transform: scale(1.02);
+        }
+        
+        /* Clickable image styling */
+        .viz-img-container img {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .viz-img-container img:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+            opacity: 0.9;
+        }
+        
+        .viz-img-container {
+            position: relative;
+        }
+        
+        .viz-img-container::after {
+            content: '🔍 Click to enlarge';
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .viz-img-container:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1><i class="bi bi-bar-chart-fill me-2"></i>Golf Club Analytics</h1>
+                    <p class="mb-0">Comprehensive Dashboard for Operational Improvement</p>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <div class="d-flex justify-content-md-end align-items-center">
+                        <span class="me-2">Light</span>
+                        <label class="toggle-switch mx-2">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span>Dark</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="dateFilter" class="form-label">Date Range</label>
+                    <select class="form-select" id="dateFilter">
+                        <option value="all" selected>All Dates</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="last30">Last 30 Days</option>
+                        <option value="last90">Last 90 Days</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="courseFilter" class="form-label">Course</label>
+                    <select class="form-select" id="courseFilter">
+                        <option value="all" selected>All Courses</option>
+                        <option value="A">Course A</option>
+                        <option value="B">Course B</option>
+                        <option value="Par 3">Par 3</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="playerTypeFilter" class="form-label">Player Type</label>
+                    <select class="form-select" id="playerTypeFilter">
+                        <option value="all" selected>All Player Types</option>
+                        <!-- Dynamic options will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="weatherFilter" class="form-label">Weather Condition</label>
+                    <select class="form-select" id="weatherFilter">
+                        <option value="all" selected>All Conditions</option>
+                        <option value="rainy">Rainy</option>
+                        <option value="non-rainy">Non-Rainy</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12 text-end">
+                    <button class="btn btn-primary" id="applyFilters">Apply Filters</button>
+                    <button class="btn btn-outline-secondary ms-2" id="resetFilters">Reset</button>
+                </div>
+            </div>
+            <div class="row mt-1">
+                <div class="col-12">
+                    <p id="filterStatusMessage" class="text-muted small" style="min-height: 1.2em;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Stats Row -->
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-value" id="totalBookings">145,496</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-value" id="cancellationRate">18.6%</div>
+                    <div class="stat-label">Cancellation Rate</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-value" id="arrivalRate">59.5%</div>
+                    <div class="stat-label">Arrival Rate</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="stat-value" id="peakHour">10 AM</div>
+                    <div class="stat-label">Peak Booking Hour</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Booking Patterns -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Booking Patterns</span>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-light active" data-view="hour">Hourly</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" data-view="day">Daily</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" data-view="trend">Trend</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="viz-img-container" id="bookingPatternContainer">
+                            <!-- Dynamic chart will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Utilization -->
+                <div class="card mb-4">
+                    <div class="card-header">Course Utilization</div>
+                    <div class="card-body">
+                        <div class="viz-img-container">
+                            <img src="visualizations/course_popularity.png" alt="Course Popularity" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Utilization by Hour -->
+                <div class="card mb-4">
+                    <div class="card-header">Course Utilization by Hour</div>
+                    <div class="card-body">
+                        <div class="viz-img-container">
+                            <img src="visualizations/Course Utilization by Hour (06–18).png" alt="Course Utilization by Hour" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Player Type Distribution -->
+                <div class="card mb-4">
+                    <div class="card-header">Player Type Distribution</div>
+                    <div class="card-body">
+                        <div class="viz-img-container">
+                            <img src="visualizations/Player Type Distribution.png" alt="Player Type Distribution" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Status -->
+                <div class="card mb-4">
+                    <div class="card-header">Booking Status</div>
+                    <div class="card-body">
+                        <div class="viz-img-container">
+                            <img src="visualizations/Booking Status Distribution.png" alt="Booking Status Distribution" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Insights -->
+                <div class="card mb-4">
+                    <div class="card-header">Key Insights</div>
+                    <div class="card-body">
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-lightbulb-fill me-2"></i>Peak Booking Times
+                            </div>
+                            <div class="insight-content">
+                                The most popular booking hour is 10:00 AM, accounting for 13.6% of all bookings. Saturday is the most popular day for bookings (16.5%).
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Course Popularity
+                            </div>
+                            <div class="insight-content">
+                                Course A is the most popular with 49.3% of all bookings. Consider evaluating pricing or promotions for less utilized courses.
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>High Cancellation Rate
+                            </div>
+                            <div class="insight-content">
+                                Lid Comfort players have a significantly higher cancellation rate (38.7%). Consider implementing a confirmation policy for this group.
+                            </div>
+                        </div>
+                        <div class="insight-card" style="border-left-color: var(--weather-rainy);">
+                            <div class="insight-title">
+                                <i class="bi bi-cloud-rain-fill me-2"></i>Weather Impact
+                            </div>
+                            <div class="insight-content">
+                                Rainy conditions increase cancellation rates by 7.3 percentage points compared to non-rainy conditions. There's a moderate positive correlation (0.6) between temperature and booking volume.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Analysis Tabs -->
+        <div class="card mb-4">
+            <div class="card-header">Detailed Analysis</div>
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs" id="analysisTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="player-tab" data-bs-toggle="tab" data-bs-target="#player-tab-pane" type="button" role="tab">Player Analysis</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="course-tab" data-bs-toggle="tab" data-bs-target="#course-tab-pane" type="button" role="tab">Course Analysis</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="weather-tab" data-bs-toggle="tab" data-bs-target="#weather-tab-pane" type="button" role="tab">Weather Analysis</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cancellation-tab" data-bs-toggle="tab" data-bs-target="#cancellation-tab-pane" type="button" role="tab">Cancellation Analysis</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="channel-tab" data-bs-toggle="tab" data-bs-target="#channel-tab-pane" type="button" role="tab">Channel Analysis</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="analysisTabContent">
+                    <div class="tab-pane fade show active" id="player-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Player Type Preferences by Course</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/player_course_pref.png" alt="Player Type Preferences by Course" class="img-fluid">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Cancellation Rate by Player Type</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/Cancellation Rate by Player Type.png" alt="Cancellation Rate by Player Type" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="course-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5>Course Utilization</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/course_popularity.png" alt="Course Popularity" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <!-- <h5>Course Utilization by Hour</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/course_hour_heatmap.png" alt="Course Utilization by Hour" class="img-fluid">
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="weather-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Temperature Impact on Booking Volume</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/temperature_impact.png" alt="Temperature Impact on Booking Volume" class="img-fluid">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Rain Impact on Cancellation Rate</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/rain_impact.png" alt="Rain Impact on Cancellation Rate" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h5>Weather Impact Insights</h5>
+                                <div class="insight-card" style="border-left-color: var(--weather-sunny);">
+                                    <div class="insight-title">Temperature Effect</div>
+                                    <div class="insight-content">
+                                        There is a moderate positive correlation (0.6) between temperature and booking volume. Higher temperatures generally lead to more bookings.
+                                    </div>
+                                </div>
+                                <div class="insight-card" style="border-left-color: var(--weather-rainy);">
+                                    <div class="insight-title">Rain Effect</div>
+                                    <div class="insight-content">
+                                        Rainy conditions increase cancellation rates by 7.3 percentage points compared to non-rainy conditions (22.5% vs 15.2%).
+                                    </div>
+                                </div>
+                                <div class="insight-card" style="border-left-color: var(--accent-color);">
+                                    <div class="insight-title">Operational Recommendation</div>
+                                    <div class="insight-content">
+                                        Develop a weather contingency plan including flexible rescheduling options and indoor facilities to minimize cancellations during rainy conditions.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="cancellation-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Cancellation Rate by Player Type</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/Cancellation Rate by Player Type.png" alt="Cancellation Rate by Player Type" class="img-fluid">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Recommendations to Reduce Cancellations</h5>
+                                <div class="insight-card">
+                                    <div class="insight-title">Targeted Cancellation Policy</div>
+                                    <div class="insight-content">
+                                        Implement a more stringent cancellation policy specifically for Lid Comfort players who show higher cancellation rates (38.7%).
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-title">Weather-Based Flexibility</div>
+                                    <div class="insight-content">
+                                        Offer flexible rescheduling options during forecasted rainy conditions to reduce weather-related cancellations.
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-title">Confirmation System</div>
+                                    <div class="insight-content">
+                                        Implement an automated confirmation system that sends reminders 24-48 hours before tee time, especially for player types with high cancellation rates.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="channel-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Booking Channel Type Distribution</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/channel_type_pie.png" alt="Booking Channel Type Distribution" class="img-fluid">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Detailed Channel Distribution</h5>
+                                <div class="viz-img-container">
+                                    <img src="visualizations/Detailed Channel Distribution.png" alt="Detailed Channel Distribution" class="img-fluid">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h5>Channel Insights</h5>
+                                <div class="insight-card">
+                                    <div class="insight-title">Most Popular Booking Channel</div>
+                                    <div class="insight-content">
+                                        The most popular booking channel is Online via Chronogolf (Mobile), accounting for 45.2% of all bookings.
+                                    </div>
+                                </div>
+                                <div class="insight-card">
+                                    <div class="insight-title">Channel Optimization</div>
+                                    <div class="insight-content">
+                                        Invest in improving the Online booking experience via Chronogolf as it's the most popular booking channel. Consider enhancing the mobile interface and adding features like weather forecasts and course conditions.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operational Recommendations -->
+        <div class="card mb-4">
+            <div class="card-header">Operational Recommendations</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-people-fill me-2"></i>Staffing
+                            </div>
+                            <div class="insight-content">
+                                <p>Optimize staff allocation during peak booking hours around 10:00 AM to ensure smooth operations and customer satisfaction.</p>
+                                <p>Consider additional staffing on Saturdays, which is the most popular day for bookings (16.5% of all bookings).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Marketing
+                            </div>
+                            <div class="insight-content">
+                                <p>Create promotions for less utilized courses to balance demand with Course A, which is currently the most popular (49.3% of bookings).</p>
+                                <p>Develop targeted marketing campaigns for off-peak hours to distribute bookings more evenly throughout the day.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Policy
+                            </div>
+                            <div class="insight-content">
+                                <p>Implement a more stringent cancellation policy specifically for Lid Comfort players who show higher cancellation rates (38.7%).</p>
+                                <p>Consider a tiered cancellation policy based on player type and historical behavior to reduce overall cancellation rate (currently 18.6%).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="insight-card">
+                            <div class="insight-title">
+                                <i class="bi bi-cloud-rain-fill me-2"></i>Weather Planning
+                            </div>
+                            <div class="insight-content">
+                                <p>Develop a weather contingency plan including flexible rescheduling options to minimize cancellations during rainy conditions.</p>
+                                <p>Consider offering indoor alternatives or covered practice areas during inclement weather to maintain customer engagement.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="dashboard-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">Golf Club Comprehensive Analytics Dashboard</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Last updated: May 22, 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">Chart View</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" alt="" class="img-fluid">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="downloadBtn">Download Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        // Global variables for data storage
+        let originalData = null;
+        let filteredData = null;
+        let currentFilters = {
+            date: 'all',
+            course: 'all',
+            playerType: 'all',
+            weather: 'all'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data and initialize dashboard
+            loadData();
+            
+            // Toggle between booking pattern views
+            const viewButtons = document.querySelectorAll('[data-view]');
+            
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    viewButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const view = this.getAttribute('data-view');
+                    updateBookingPatternChart(view);
+                });
+            });
+
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.style.setProperty('--light-bg', '#1a1a1a');
+                    document.documentElement.style.setProperty('--text-dark', '#f8f9fa');
+                    document.body.style.backgroundColor = '#1a1a1a';
+                    document.body.style.color = '#f8f9fa';
+                } else {
+                    document.documentElement.style.setProperty('--light-bg', '#ecf0f1');
+                    document.documentElement.style.setProperty('--text-dark', '#343a40');
+                    document.body.style.backgroundColor = '#ecf0f1';
+                    document.body.style.color = '#343a40';
+                }
+            });
+
+            // Filter functionality with actual data filtering
+            const applyFiltersBtn = document.getElementById('applyFilters');
+            const resetFiltersBtn = document.getElementById('resetFilters');
+            const filterStatusMessage = document.getElementById('filterStatusMessage');
+            
+            applyFiltersBtn.addEventListener('click', function() {
+                applyFilters();
+            });
+            
+            resetFiltersBtn.addEventListener('click', function() {
+                resetFilters();
+            });
+            
+            // Image modal functionality
+            initializeImageModal();
+        });
+
+        // Initialize image modal functionality
+        function initializeImageModal() {
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            const modalImage = document.getElementById('modalImage');
+            const modalTitle = document.getElementById('imageModalTitle');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            // Add click event to all images in viz containers
+            document.querySelectorAll('.viz-img-container img').forEach(img => {
+                img.addEventListener('click', function() {
+                    // Set modal image source and alt text
+                    modalImage.src = this.src;
+                    modalImage.alt = this.alt;
+                    
+                    // Set modal title based on alt text or parent card title
+                    const cardHeader = this.closest('.card')?.querySelector('.card-header');
+                    const title = cardHeader ? cardHeader.textContent.trim() : this.alt || 'Chart View';
+                    modalTitle.textContent = title;
+                    
+                    // Show modal
+                    modal.show();
+                });
+            });
+            
+            // Download functionality
+            downloadBtn.addEventListener('click', function() {
+                const imageSrc = modalImage.src;
+                const imageName = modalTitle.textContent.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.png';
+                
+                // Create a temporary anchor element for download
+                const link = document.createElement('a');
+                link.href = imageSrc;
+                link.download = imageName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.querySelector('.modal.show')) {
+                    modal.hide();
+                }
+            });
+        }
+
+        // Load JSON data
+        async function loadData() {
+            try {
+                console.log('Loading processed golf data...');
+                
+                // Load the pre-processed JSON data
+                const response = await fetch('data/golf_data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const jsonData = await response.json();
+                console.log('JSON data loaded successfully:', jsonData.length, 'records');
+                
+                // Process the JSON data
+                originalData = jsonData.map(d => ({
+                    ...d,
+                    Date: new Date(d.Date),
+                    Hour: +d.Hour,
+                    Temperature_C: +d.Temperature_C || 0,
+                    Precipitation_mm: +d.Precipitation_mm || 0
+                }));
+                
+                filteredData = [...originalData];
+                
+                // Populate dynamic filters
+                populatePlayerTypeFilter();
+                
+                updateDashboard();
+                
+                document.getElementById('filterStatusMessage').textContent = `Complete dataset loaded successfully! ${originalData.length} bookings available. Filters are now functional!`;
+                console.log('Dashboard updated with', originalData.length, 'records');
+                
+            } catch (error) {
+                console.error('Error loading JSON data:', error);
+                document.getElementById('filterStatusMessage').textContent = 'Error loading data. Falling back to sample data.';
+                
+                // Fallback to sample data
+                const sampleData = generateSampleData();
+                originalData = sampleData.map(d => ({
+                    ...d,
+                    Date: new Date(d.Date),
+                    Hour: +d.Hour,
+                    Temperature_C: +d.Temperature_C || 0,
+                    Precipitation_mm: +d.Precipitation_mm || 0,
+                    Rainy: d.Precipitation_mm > 0 ? 'rainy' : 'non-rainy'
+                }));
+                
+                filteredData = [...originalData];
+                updateDashboard();
+            }
+        }
+
+        // Function to populate player type filter dynamically
+        function populatePlayerTypeFilter() {
+            if (!originalData) return;
+            
+            // Count occurrences of each player type
+            const playerTypeCounts = {};
+            originalData.forEach(d => {
+                const playerType = d.Player_Type;
+                if (playerType && playerType.trim() !== '') {
+                    playerTypeCounts[playerType] = (playerTypeCounts[playerType] || 0) + 1;
+                }
+            });
+            
+            // Sort player types by frequency (most to least)
+            const playerTypes = Object.entries(playerTypeCounts)
+                .sort((a, b) => b[1] - a[1]) // Sort by count (descending)
+                .map(([playerType, count]) => ({ playerType, count }));
+            
+            console.log('Player types sorted by frequency:', playerTypes);
+            
+            // Get the select element
+            const select = document.getElementById('playerTypeFilter');
+            
+            // Keep the "All Player Types" option
+            const allOption = select.querySelector('option[value="all"]');
+            
+            // Clear existing options except "All"
+            select.innerHTML = '';
+            select.appendChild(allOption);
+            
+            // Add all player types from data, sorted by frequency
+            playerTypes.forEach(({ playerType, count }) => {
+                const option = document.createElement('option');
+                option.value = playerType;
+                option.textContent = `${playerType} (${count.toLocaleString()})`;
+                select.appendChild(option);
+            });
+            
+            console.log(`Player type filter updated with ${playerTypes.length} options, sorted by frequency`);
+        }
+
+        // Generate realistic sample data
+        function generateSampleData() {
+            const data = [];
+            const courses = ['A', 'B', 'Par 3'];
+            const playerTypes = ['Greenfee', 'Business Gold', 'Lid Premium', 'Lid Unlimited', 'Lid', 'Lid Comfort'];
+            const statuses = ['Arrived', 'Cancelled', 'No Show'];
+            const statusWeights = [0.6, 0.25, 0.15]; // 60% arrived, 25% cancelled, 15% no show
+            
+            // Generate data for the last 2 years
+            const startDate = new Date('2023-01-01');
+            const endDate = new Date('2024-12-31');
+            
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                // Generate 10-50 bookings per day
+                const bookingsPerDay = Math.floor(Math.random() * 40) + 10;
+                
+                for (let i = 0; i < bookingsPerDay; i++) {
+                    const hour = Math.floor(Math.random() * 12) + 7; // 7 AM to 6 PM
+                    const course = courses[Math.floor(Math.random() * courses.length)];
+                    const playerType = playerTypes[Math.floor(Math.random() * playerTypes.length)];
+                    
+                    // Generate status based on weights
+                    const statusRandom = Math.random();
+                    let status;
+                    if (statusRandom < statusWeights[0]) {
+                        status = statuses[0]; // Arrived
+                    } else if (statusRandom < statusWeights[0] + statusWeights[1]) {
+                        status = statuses[1]; // Cancelled
+                    } else {
+                        status = statuses[2]; // No Show
+                    }
+                    
+                    // Higher cancellation rate for Lid Comfort
+                    if (playerType === 'Lid Comfort' && Math.random() < 0.4) {
+                        status = 'Cancelled';
+                    }
+                    
+                    // Generate weather data
+                    const baseTemp = 15 + Math.sin((d.getMonth() / 12) * 2 * Math.PI) * 10; // Seasonal variation
+                    const temperature = baseTemp + (Math.random() - 0.5) * 10;
+                    const precipitation = Math.random() < 0.3 ? Math.random() * 10 : 0; // 30% chance of rain
+                    
+                    // Rain affects cancellations
+                    if (precipitation > 5 && Math.random() < 0.3) {
+                        status = 'Cancelled';
+                    }
+                    
+                    data.push({
+                        Date: d.toISOString().split('T')[0],
+                        Hour: hour,
+                        Course: course,
+                        Player_Type: playerType,
+                        Status: status,
+                        Temperature_C: temperature.toFixed(1),
+                        Precipitation_mm: precipitation.toFixed(1)
+                    });
+                }
+            }
+            
+            return data;
+        }
+
+        // Apply filters to data
+        function applyFilters() {
+            if (!originalData) {
+                document.getElementById('filterStatusMessage').textContent = 'Data not loaded yet. Please wait.';
+                return;
+            }
+
+                const dateFilter = document.getElementById('dateFilter').value;
+                const courseFilter = document.getElementById('courseFilter').value;
+                const playerTypeFilter = document.getElementById('playerTypeFilter').value;
+                const weatherFilter = document.getElementById('weatherFilter').value;
+
+            // Update current filters
+            currentFilters = {
+                date: dateFilter,
+                course: courseFilter,
+                playerType: playerTypeFilter,
+                weather: weatherFilter
+            };
+
+            // Filter data
+            filteredData = originalData.filter(d => {
+                // Date filter
+                let dateMatch = true;
+                if (dateFilter === '2023') {
+                    dateMatch = d.Date.getFullYear() === 2023;
+                } else if (dateFilter === '2024') {
+                    dateMatch = d.Date.getFullYear() === 2024;
+                } else if (dateFilter === 'last30') {
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    dateMatch = d.Date >= thirtyDaysAgo;
+                } else if (dateFilter === 'last90') {
+                    const ninetyDaysAgo = new Date();
+                    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+                    dateMatch = d.Date >= ninetyDaysAgo;
+                }
+
+                // Course filter
+                const courseMatch = courseFilter === 'all' || d.Course === courseFilter;
+
+                // Player type filter
+                const playerTypeMatch = playerTypeFilter === 'all' || d.Player_Type === playerTypeFilter;
+
+                // Weather filter
+                const weatherMatch = weatherFilter === 'all' || d.Rainy === weatherFilter;
+
+                return dateMatch && courseMatch && playerTypeMatch && weatherMatch;
+            });
+
+            updateDashboard();
+            
+            const message = `Filters Applied: ${filteredData.length} bookings found. Date: ${dateFilter}, Course: ${courseFilter}, Player Type: ${playerTypeFilter}, Weather: ${weatherFilter}`;
+            document.getElementById('filterStatusMessage').textContent = message;
+        }
+
+        // Reset filters
+        function resetFilters() {
+                document.getElementById('dateFilter').value = 'all';
+                document.getElementById('courseFilter').value = 'all';
+                document.getElementById('playerTypeFilter').value = 'all';
+                document.getElementById('weatherFilter').value = 'all';
+            
+            currentFilters = {
+                date: 'all',
+                course: 'all',
+                playerType: 'all',
+                weather: 'all'
+            };
+            
+            if (originalData) {
+                filteredData = [...originalData];
+                updateDashboard();
+                document.getElementById('filterStatusMessage').textContent = `Filters reset. Showing all ${filteredData.length} bookings.`;
+            } else {
+                document.getElementById('filterStatusMessage').textContent = 'Filters reset. Data not loaded yet.';
+            }
+        }
+
+        // Update dashboard with filtered data
+        function updateDashboard() {
+            if (!filteredData) return;
+
+            updateKeyStats();
+            updateBookingPatternChart('hour');
+        }
+
+        // Update key statistics
+        function updateKeyStats() {
+            const totalBookings = filteredData.length;
+            const cancelledBookings = filteredData.filter(d => d.Status === 'Cancelled').length;
+            const arrivedBookings = filteredData.filter(d => d.Status === 'Arrived').length;
+            
+            const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings * 100).toFixed(1) : 0;
+            const arrivalRate = totalBookings > 0 ? (arrivedBookings / totalBookings * 100).toFixed(1) : 0;
+
+            // Find peak hour
+            let peakHour = 10; // Default fallback
+            if (totalBookings > 0) {
+                const hourCounts = d3.rollup(filteredData, v => v.length, d => d.Hour);
+                if (hourCounts.size > 0) {
+                    peakHour = Array.from(hourCounts.entries()).reduce((a, b) => hourCounts.get(a[0]) > hourCounts.get(b[0]) ? a : b)[0];
+                }
+            }
+
+            // Update display
+            document.getElementById('totalBookings').textContent = totalBookings.toLocaleString();
+            document.getElementById('cancellationRate').textContent = cancellationRate + '%';
+            document.getElementById('arrivalRate').textContent = arrivalRate + '%';
+            document.getElementById('peakHour').textContent = peakHour + ':00';
+        }
+
+        // Update booking pattern chart
+        function updateBookingPatternChart(view) {
+            if (!filteredData) return;
+
+            const container = document.getElementById('bookingPatternContainer');
+            
+            // Clear existing content
+            container.innerHTML = '';
+
+            let chartData, xLabel, title;
+
+            if (view === 'hour') {
+                const hourCounts = d3.rollup(filteredData, v => v.length, d => d.Hour);
+                chartData = Array.from(hourCounts.entries()).sort((a, b) => a[0] - b[0]);
+                xLabel = 'Hour of Day';
+                title = 'Booking Distribution by Hour';
+            } else if (view === 'day') {
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayCounts = d3.rollup(filteredData, v => v.length, d => d.Date.getDay());
+                chartData = Array.from(dayCounts.entries()).map(([day, count]) => [dayNames[day], count]);
+                xLabel = 'Day of Week';
+                title = 'Booking Distribution by Day';
+            } else if (view === 'trend') {
+                const monthCounts = d3.rollup(filteredData, v => v.length, d => d.Date.getFullYear() + '-' + String(d.Date.getMonth() + 1).padStart(2, '0'));
+                chartData = Array.from(monthCounts.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+                xLabel = 'Month';
+                title = 'Booking Trends Over Time';
+            }
+
+            createBarChart(container, chartData, title, xLabel, 'Number of Bookings');
+        }
+
+        // Create a simple bar chart using SVG
+        function createBarChart(container, data, title, xLabel, yLabel) {
+            // Handle empty data
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">No data available for the selected filters</div>';
+                return;
+            }
+
+            const margin = {top: 40, right: 30, bottom: 80, left: 60};
+            const width = container.offsetWidth - margin.left - margin.right;
+            const height = 300 - margin.top - margin.bottom;
+
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const xScale = d3.scaleBand()
+                .domain(data.map(d => d[0]))
+                .range([0, width])
+                .padding(0.1);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d[1])])
+                .range([height, 0]);
+
+            // Bars
+            g.selectAll('.bar')
+                .data(data)
+                .enter().append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => xScale(d[0]))
+                .attr('width', xScale.bandwidth())
+                .attr('y', d => yScale(d[1]))
+                .attr('height', d => height - yScale(d[1]))
+                .attr('fill', 'url(#barGradient)')
+                .attr('rx', 4)
+                .attr('ry', 4)
+                .style('filter', 'drop-shadow(0px 2px 4px rgba(0,0,0,0.1))')
+                .on('mouseover', function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('fill', '#1e293b')
+                        .style('filter', 'drop-shadow(0px 4px 8px rgba(0,0,0,0.2))');
+                    
+                    // Tooltip
+                    const tooltip = d3.select('body').append('div')
+                        .attr('class', 'tooltip')
+                        .style('position', 'absolute')
+                        .style('background', 'linear-gradient(135deg, #1e293b 0%, #334155 100%)')
+                        .style('color', 'white')
+                        .style('padding', '12px 16px')
+                        .style('border-radius', '8px')
+                        .style('pointer-events', 'none')
+                        .style('opacity', 0)
+                        .style('font-size', '0.875rem')
+                        .style('font-weight', '500')
+                        .style('box-shadow', '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)');
+                    
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .95);
+                    
+                    tooltip.html(`<strong>${d[0]}</strong><br/>${d[1]} bookings`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('fill', 'url(#barGradient)')
+                        .style('filter', 'drop-shadow(0px 2px 4px rgba(0,0,0,0.1))');
+                    d3.selectAll('.tooltip').remove();
+                });
+
+            // X axis
+            g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(xScale))
+                .selectAll('text')
+                .style('text-anchor', 'end')
+                .attr('dx', '-.8em')
+                .attr('dy', '.15em')
+                .attr('transform', 'rotate(-45)');
+
+            // Y axis
+            g.append('g')
+                .call(d3.axisLeft(yScale));
+
+            // Add gradient definition
+            const defs = svg.append('defs');
+            
+            const gradient = defs.append('linearGradient')
+                .attr('id', 'barGradient')
+                .attr('x1', '0%')
+                .attr('y1', '0%')
+                .attr('x2', '0%')
+                .attr('y2', '100%');
+            
+            gradient.append('stop')
+                .attr('offset', '0%')
+                .attr('stop-color', '#06b6d4');
+            
+            gradient.append('stop')
+                .attr('offset', '100%')
+                .attr('stop-color', '#0891b2');
+
+            // Title
+            svg.append('text')
+                .attr('x', (width + margin.left + margin.right) / 2)
+                .attr('y', margin.top / 2)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .text(title);
+
+            // X axis label
+            svg.append('text')
+                .attr('transform', `translate(${(width + margin.left + margin.right) / 2}, ${height + margin.top + margin.bottom - 10})`)
+                .style('text-anchor', 'middle')
+                .text(xLabel);
+
+            // Y axis label
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', 20)
+                .attr('x', 0 - (height + margin.top) / 2)
+                .attr('dy', '1em')
+                .style('text-anchor', 'middle')
+                .text(yLabel);
+        }
+    </script>
+</body>
+</html>
